@@ -9,13 +9,15 @@ import json
 import os
 
 '''
-basis_size = 40
-pop_size = 500
-select_size = 300
-'''
+#For debug
 basis_size = 4
 pop_size = 5
 select_size = 3
+'''
+
+basis_size = 40
+pop_size = 500
+select_size = 300
 
 def initialize_population():
 	size = int(basis_size*pop_size)
@@ -132,25 +134,37 @@ def lonlat_to_xy(lon_mesh,lat_mesh,lon0,lat0):
 	return mesh_X,mesh_Y
 
 def normalize_XYZ(mesh_X,mesh_Y,Z):
-	mesh_X = 10 * mesh_X / np.linalg.norm(mesh_X)
-	mesh_X = mesh_X - np.mean(mesh_X)
-	mesh_Y = 10 * mesh_Y / np.linalg.norm(mesh_Y)
-	mesh_Y = mesh_Y - np.mean(mesh_Y)
-	Z = 1000 * Z / np.linalg.norm(Z)
-	return mesh_X,mesh_Y,Z
+	c_X = 10/np.linalg.norm(mesh_X)
+	mesh_X = c_X*mesh_X
+	d_X = np.mean(mesh_X)
+	mesh_X = mesh_X - d_X
+
+	c_Y = 10/np.linalg.norm(mesh_Y)
+	mesh_Y = c_Y*mesh_Y
+	d_Y = np.mean(mesh_Y)
+	mesh_Y = mesh_Y - d_Y
+
+	c_Z = 1000/np.linalg.norm(Z)
+	Z = c_Z*Z
+
+	norm_param=[c_X,d_X,c_Y,d_Y,c_Z]
+	return mesh_X,mesh_Y,Z,norm_param
 
 def smoothing_Z(Z):
 	Z = gaussian_filter(Z,sigma=2)
 	return Z
 
-def reverse_normalize(param_list,mesh_X,mesh_Y,Z):
-	X_const = 10 / np.linalg.norm(mesh_X)
-	Y_const = 10 / np.linalg.norm(mesh_Y)
-	Z_const = 1000 / np.linalg.norm(Z)
+def reverse_normalize(param_list,norm_param):
+	upscaled_param=[]
+	c_X,d_X,c_Y,d_Y,c_Z=norm_param
 	for param in param_list:
 		pi,mu_x,mu_y,a = param
-
-	return param_list
+		mu_x=(mu_x-d_X)/c_X
+		mu_y=(mu_y-d_Y)/c_Y
+		a=a*(1/c_X**2+1/c_Y**2)**(0.5)
+		pi=pi*1/c_Z*(1/c_X**2+1/c_Y**2)
+		upscaled_param.append([pi,mu_x,mu_y,a])
+	return upscaled_param
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
@@ -178,12 +192,13 @@ if __name__ == '__main__':
 
 	lon_seoul_mesh,lat_seoul_mesh = np.meshgrid(lon_seoul,lat_seoul)
 	mesh_X_ori,mesh_Y_ori = lonlat_to_xy(lon_seoul_mesh,lat_seoul_mesh,lon0,lat0)
-	mesh_X,mesh_Y,Z = normalize_XYZ(mesh_X_ori,mesh_Y_ori,Z_ori)
+	mesh_X,mesh_Y,Z,norm_param = normalize_XYZ(mesh_X_ori,mesh_Y_ori,Z_ori)
 	Z = smoothing_Z(Z)
 	
 	param_list = initialize_population()
 
-	optim_step = 2
+	#optim_step = 2 #For debug
+	optim_step = 300
 	for step in range(optim_step):
 		start_time = time.time()
 		param_list = ES_update(mesh_X,mesh_Y,Z,param_list)
@@ -197,7 +212,7 @@ if __name__ == '__main__':
 		error_list.append(error)
 
 	min_idx = np.argmin(np.array(error_list))
-	result_param = reverse_normalize(param_list[min_idx],mesh_X_ori,mesh_Y_ori,Z_ori)
+	result_param = reverse_normalize(param_list[min_idx],norm_param)
 
 	RMSE_error = np.linalg.norm(Z-Z_bell)
 	print("RMSE error: {}".format(RMSE_error))
@@ -208,7 +223,7 @@ if __name__ == '__main__':
 		json.dump(result_param,f,indent=4)
 
 	#For visualize
-	'''
+	
 	fig = plt.figure()
 	ax_original = fig.add_subplot(121,projection='3d')
 	ax_original.plot_surface(mesh_Y_ori,mesh_X_ori,Z_ori)
@@ -218,12 +233,4 @@ if __name__ == '__main__':
 	ax_decomp.plot_surface(mesh_Y_ori,mesh_X_ori,Z_bell)
 
 	plt.show()
-	'''
-
-	'''
-	fig = plt.figure()
-	ax = fig.add_subplot(111,projection='3d')
-	X,Y = np.meshgrid(x,y)
-	ax.plot_surface(Y,X,Z)
-	plt.show()
-	'''
+	
