@@ -1,5 +1,4 @@
 # surface-decomposition
-surface decomposition using evolutionary startegy
 
 ## How to run
 ```
