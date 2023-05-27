@@ -16,8 +16,8 @@ Left: raw data / Right: decomposed data
 <img width="80%" src="project_results/ES_test_2.png"/>
 
 ## Methodology
-Description of bell-shaped function, parameter, and decomposed surface function in below.
+Description of bell-shaped function, parameter, and decomposed surface function below.
 <img width="80%" src="project_results/method_1.png"/>
 
-Description of genetic optimization algorithm in below.
+Description of genetic optimization algorithm below.
 <img width="80%" src="project_results/method_2.png"/>
