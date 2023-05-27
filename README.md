@@ -1,7 +1,7 @@
 # surface-decomposition
-Code and explanation for research project about surface decomposition using evolutionary startegy.
+Code and explanation for research project about surface decomposition using genetic algorithm.
 
-This project aims to decompose earth surface data with basis function as bell-shaped function using evolutionary optimization startegy.
+This project aims to decompose earth surface data with basis function as bell-shaped function using genetic optimization algorithm.
 
 
 ## How to run
@@ -16,3 +16,8 @@ Left: raw data / Right: decomposed data
 <img width="80%" src="project_results/ES_test_2.png"/>
 
 ## Methodology
+Description of bell-shaped function, parameter, and decomposed surface function in below.
+<img width="80%" src="project_results/method_1.png"/>
+
+Description of genetic optimization algorithm in below.
+<img width="80%" src="project_results/method_2.png"/>
