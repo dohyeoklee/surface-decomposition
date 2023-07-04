@@ -1,5 +1,5 @@
 # surface-decomposition-genetic-algorithm
-Code and explanation for research project about surface decomposition using genetic algorithm.
+Code and explanation for research project about surface decomposition using genetic algorithm for earth geographical data.
 
 This project aims to decompose earth surface data with basis function as bell-shaped function using genetic optimization algorithm.
 
